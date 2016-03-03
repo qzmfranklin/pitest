@@ -1,0 +1,2 @@
+class DontLoadMe(object):
+    pass

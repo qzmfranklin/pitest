@@ -1,0 +1,13 @@
+This directory has the sample codes that demonstrate the usage of pitest.
+
+If you are new to pitest, start with basic-usage.py.
+
+basic-usage.py:
+    How to dynamically pass arguments to a test methods and run the tests.
+
+deps.py:
+    How to do dependency tracking using pitest.
+
+blocked-deps.py:
+    If a failed test/test_case is the prerequisite of other tests, those tests
+    are blocked.
