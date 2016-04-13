@@ -4,7 +4,7 @@ import fnmatch
 import inspect
 import re
 
-class TestCaseBase(object):
+class TestCase(object):
     """Base test case class.
 
     Terminology:
@@ -85,7 +85,7 @@ class TestCaseBase(object):
     def _get_all_tests(self):
         """
         Return a list of (name, method) tuples whose names match one or more of
-        the patterns listed in TestCaseBase.test_patterns.
+        the patterns listed in TestCase.test_patterns.
 
         The returned methods are bound to the instance of the test case
         subclass and are callable.
@@ -94,7 +94,7 @@ class TestCaseBase(object):
         in this test case.
         """
         test_methods = []
-        for pattern in TestCaseBase.test_patterns:
+        for pattern in TestCase.test_patterns:
             reg_pattern = fnmatch.translate(pattern)
             cls_methods = inspect.getmembers(self, inspect.ismethod)
             for name, cls in cls_methods:
@@ -106,7 +106,7 @@ class TestCaseBase(object):
     def _get_all_tests_class(self_cls):
         """
         Return a list of (name, method) tuples whose names match one or more of
-        the patterns listed in TestCaseBase.test_patterns.
+        the patterns listed in TestCase.test_patterns.
 
         The returned methods are NOT bound to the instance of the test case
         subclass and are callable.

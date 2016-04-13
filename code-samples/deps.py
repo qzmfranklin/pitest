@@ -37,7 +37,7 @@ import sys
 
 # To save some coding, the setup() and test_foo() methods are implemented in the
 # base test case class, CaseBase. DemoCase3 implements a test_bar().
-class CaseBase(pitest.TestCaseBase):
+class CaseBase(pitest.TestCase):
     def setup(self):
         pass
     def test_foo(self):

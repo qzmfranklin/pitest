@@ -37,7 +37,7 @@ import pitest
 import os
 import sys
 
-class CaseBase(pitest.TestCaseBase):
+class CaseBase(pitest.TestCase):
     def test_foo(self):
         pass
     def test_bar(self):

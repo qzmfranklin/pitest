@@ -51,7 +51,7 @@ class Runner(object):
             about this run.
 
         Args:
-            case: An instance of a subclass of pitest.TestCaseBase.
+            case: An instance of a subclass of pitest.TestCase.
             args_obj: An instance of Args.
             fullname: The full name of the test case. If None, just use
                 case.__class__.__name__.

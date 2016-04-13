@@ -16,7 +16,7 @@ import unittest
 #      \       \    /
 #       -> 9 ---> 2
 
-class CaseBaseTmp(pitest.TestCaseBase):
+class CaseBaseTmp(pitest.TestCase):
     pass
 class DemoCase0(CaseBaseTmp):
     deps = [ 'DemoCase1', 'DemoCase2' ]
@@ -40,7 +40,7 @@ class DemoCase10(CaseBaseTmp):
 class TestSuiteDemo1(pitest.TestSuiteBase):
     testcase_baseclasses = [ 'CaseBaseTmp' ]
 
-class CaseBaseTmp2(pitest.TestCaseBase):
+class CaseBaseTmp2(pitest.TestCase):
     pass
 class DemoCase12(CaseBaseTmp2):
     internal_deps = {

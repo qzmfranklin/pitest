@@ -10,10 +10,10 @@ Features of PITEST:
 """
 
 __all__ = [ 'DAG', 'Discover', 'Main', 'Runner', 'Scheduler', 'Args',
-           'TestCaseBase', 'TestSuiteBase', 'TestCaseResult', 'TestSuiteResult' ]
+           'TestCase', 'TestSuiteBase', 'TestCaseResult', 'TestSuiteResult' ]
 
 from .args import Args, ArgsError
-from .case import TestCaseBase
+from .case import TestCase
 from .dag import DAG, Py3DAGError
 from .discover import Discover, DiscoverError
 from .main import Main

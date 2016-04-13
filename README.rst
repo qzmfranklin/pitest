@@ -37,7 +37,7 @@ Usage Examples
 
     import pitest
 
-    class MyTestCase(pitest.TestCaseBase):
+    class MyTestCase(pitest.TestCase):
         # By default, test methods are methods whose names start with 'test_'. You
         # can change the matching patterns by defining the 'test_patterns' class
         # variable by uncommenting the following line:

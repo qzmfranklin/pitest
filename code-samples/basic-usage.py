@@ -17,7 +17,7 @@ Test Naming:
     does not mean test_foo and test_bar are the only valid names for test
     methods.  Anything test starting with 'test_' is picked up by pitest. You
     can change the name matching pattern by modifying
-    pitest.TestCaseBase.test_patterns when you derive a new base test case
+    pitest.TestCase.test_patterns when you derive a new base test case
     class.
 """
 
@@ -33,7 +33,7 @@ import sys
 #    -  When creating a test suite, you can specify your test suite to only
 #       discover test cases that are subclasses of this base test case class.
 #       This prevents loading test cases that have incompatible argument lists.
-class CaseBase(pitest.TestCaseBase):
+class CaseBase(pitest.TestCase):
     def setup(self, arg0, arg1, arg2, *, kwarg, kool_arg):
         print('Running {}.setup() with {}, {}, {}, {}, {}'.format(
             self.__class__.__name__, arg0, arg1, arg2, kwarg, kool_arg))
@@ -48,7 +48,7 @@ class CaseBase(pitest.TestCaseBase):
             self.__class__.__name__, arg0, arg1))
 
 # Define a test suite that only loads the custom test cases.
-# If you omit testcase_baseclasses, all subclasses of pitest.TestCaseBase will
+# If you omit testcase_baseclasses, all subclasses of pitest.TestCase will
 # be discovered and loaded when you call suite.discover() or suite.load_file().
 class TestSuiteDemo(pitest.TestSuiteBase):
     testcase_baseclasses = [ 'CaseBase' ]

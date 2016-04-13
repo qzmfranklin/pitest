@@ -23,12 +23,12 @@ class TestSuiteBase(object):
 
     Attributes:
         testcase_baseclass: The base class name of test cases. Default is
-            TestCaseBase.  Used in discover() and try_load_file() for
+            TestCase.  Used in discover() and try_load_file() for
             selectively loading of test cases.
         testcases: A list of 2-tuples (full_cls_name, class).
     """
 
-    testcase_baseclasses = [ case.TestCaseBase.__name__ ]
+    testcase_baseclasses = [ case.TestCase.__name__ ]
 
     def __init__(self):
         self._testcases = []

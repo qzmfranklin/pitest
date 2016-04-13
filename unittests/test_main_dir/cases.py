@@ -1,6 +1,6 @@
 import pitest
 
-class CaseBase(pitest.TestCaseBase):
+class CaseBase(pitest.TestCase):
     def __init__(self, arg0, *, kwarg0):
         print('{}.__init__({}, kwarg0 = {})'
               .format(self.__class__.__name__, arg0, kwarg0))

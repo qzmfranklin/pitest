@@ -13,7 +13,7 @@ class DiscoverError(Exception):
 class Discover:
 
     @staticmethod
-    def discover(start_dir, *, baseclasses = [ case.TestCaseBase.__name__ ],
+    def discover(start_dir, *, baseclasses = [ case.TestCase.__name__ ],
             recursive = True, pattern = '*.py'):
         """Discover test cases.
 
@@ -31,7 +31,7 @@ class Discover:
             foo.UnitTest
             bar.UnitTest
 
-        When you specify dependencies among test cases using TestCaseBase.deps,
+        When you specify dependencies among test cases using TestCase.deps,
         you can choose to only specify the class name. If there is only one
         matching class loaded, that class is referenced. If more than one loaded
         class has that class name, the get_deps_graph() program will raise
@@ -78,7 +78,7 @@ class Discover:
 
 
     @staticmethod
-    def load_file(fname, *, baseclasses = [ case.TestCaseBase.__name__ ]):
+    def load_file(fname, *, baseclasses = [ case.TestCase.__name__ ]):
         """Load test cases from a single file.
 
         Namespace rules applies the same way as documented in discover().

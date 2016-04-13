@@ -2,7 +2,7 @@ import os
 import pitest
 import unittest
 
-class CaseForTestArgs(pitest.TestCaseBase):
+class CaseForTestArgs(pitest.TestCase):
     def test_foo(self, arg0, *, kwarg0):
         pass
     def test_bar(self, arg0, *, kwarg0):

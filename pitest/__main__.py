@@ -18,7 +18,7 @@ if __name__ == '__main__':
         help = 'start directory for recursive scan')
     parser.add_argument('--basecases', type = str,
         nargs = '+',
-        default = [ 'TestCaseBase' ],
+        default = [ 'TestCase' ],
         help = 'base test case classes to discover')
     parser.add_argument('--recursive', action = 'store_true',
         default = False,
