@@ -1,9 +1,9 @@
 import pprint
 
-class TestCaseArgsError(Exception):
+class ArgsError(Exception):
     pass
 
-class TestCaseArgs(object):
+class Args(object):
     """Opaque argument object used by test suites and test cases.
 
     Attributes:
@@ -37,7 +37,7 @@ class TestCaseArgs(object):
                 it up.
         """
         if not method_name in self._args:
-            raise TestCaseArgsError('method_name {} is not one of {}'.format(method_name, self._args))
+            raise ArgsError('method_name {} is not one of {}'.format(method_name, self._args))
         if not args is None:
             self._args[method_name] = args
         if not kwargs is None:

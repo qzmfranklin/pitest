@@ -17,7 +17,7 @@ class Runner(object):
 
         Args:
             suite: An instance of a subclass of pitest.TestSuiteBase.
-            args_obj: An instance of TestCaseArgs.
+            args_obj: An instance of Args.
         """
         res = result.TestSuiteResult(suite.__class__.__name__, args_obj)
 
@@ -52,7 +52,7 @@ class Runner(object):
 
         Args:
             case: An instance of a subclass of pitest.TestCaseBase.
-            args_obj: An instance of TestCaseArgs.
+            args_obj: An instance of Args.
             fullname: The full name of the test case. If None, just use
                 case.__class__.__name__.
         """

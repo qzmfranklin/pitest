@@ -9,10 +9,10 @@ Features of PITEST:
     - snake_case instead camelCase
 """
 
-__all__ = [ 'DAG', 'Discover', 'Main', 'Runner', 'Scheduler', 'TestCaseArgs',
+__all__ = [ 'DAG', 'Discover', 'Main', 'Runner', 'Scheduler', 'Args',
            'TestCaseBase', 'TestSuiteBase', 'TestCaseResult', 'TestSuiteResult' ]
 
-from .args import TestCaseArgs, TestCaseArgsError
+from .args import Args, ArgsError
 from .case import TestCaseBase
 from .dag import DAG, Py3DAGError
 from .discover import Discover, DiscoverError

@@ -16,7 +16,7 @@ class TestArgs(unittest.TestCase):
     testcase_class = CaseForTestArgs
 
     def test_args(self):
-        args_obj = pitest.args.TestCaseArgs()
+        args_obj = pitest.args.Args()
         args_obj.set_method_args('test', args = ('test arg0', ),
                 kwargs = {'kwarg0': 'the value of kwarg0'})
         args_obj.set_method_args('setup', args = ('setup arg1', ),

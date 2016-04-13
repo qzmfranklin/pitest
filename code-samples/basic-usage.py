@@ -125,7 +125,7 @@ if __name__ == '__main__':
     # GOTCHA:
     #   ('arg') evaluates to 'arg', not a tuple. If you want a tuple with only
     #   one element, use ('arg', ).
-    args_obj = pitest.TestCaseArgs()
+    args_obj = pitest.Args()
     args_obj.set_method_args('setup',
             args = ('arbitrary_arg here', 'Keven', 'Amdy'),
             kwargs = {'kwarg': 'some value', 'kool_arg': 'deadbeaf'})

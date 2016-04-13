@@ -44,15 +44,15 @@ class Main(object):
         raises error.
 
         Returns:
-            A instance of pitest.TestCaseArgs.
+            A instance of pitest.Args.
 
         Args:
             source_code: python3 code that defines the args object. The source
                 code can define one or more args objects. The source code must
                 define a string object named '__pitest_main_default_args_name__'
-                and define an pitest.TestCaseArgs object whose name is the value
+                and define an pitest.Args object whose name is the value
                 of __pitest_main_default_args_name__.
-            args_name: A string, the name of the pitest.TestCaseArgs object to
+            args_name: A string, the name of the pitest.Args object to
                 return. Override the one specified by
                 __pitest_main_default_args_name__ in the source code.
                 None = do not override __pitest_main_default_args_name__.
@@ -62,7 +62,7 @@ class Main(object):
             MainError: If __pitest_main_default_args_name__ is not defined in
                 source code, or if the source code does not define object with
                 the given name, or if the retrieved object is not an instance of
-                pitest.TestCaseArgs.
+                pitest.Args.
         """
 
         scope = {}
@@ -76,8 +76,8 @@ class Main(object):
             raise MainError("Name '{}' is not defined in source code."
                            .format(actual_args_name))
         obj = scope[actual_args_name]
-        if not isinstance(obj, args.TestCaseArgs):
-            raise MainError("Retrieved object, named '{}' is not an instance of pitest.TestCaseArgs"
+        if not isinstance(obj, args.Args):
+            raise MainError("Retrieved object, named '{}' is not an instance of pitest.Args"
                            .format(actual_args_name))
 
         return obj

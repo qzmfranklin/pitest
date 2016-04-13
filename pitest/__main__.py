@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 None = no arguments.''')
     sp.add_argument('--args-name',
         default = None,
-        help = '''name of the TestCaseArgs object in the source code. This
+        help = '''name of the Args object in the source code. This
                     argument is used to override the default name defined in
                     __pitest_main_default_args_name__ in the source code.
                     None = use default, i.e., the one defined by
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                     print('{}.{}'.format(full_cls_name, method_name))
 
     elif args.command == 'run':
-        # Create an TestCaseArgs object.
+        # Create an Args object.
         args_obj = None
         init_args, init_kwargs = ((), {})
         if args.args_file:
