@@ -21,12 +21,12 @@ class PyName(object):
             obj: The object to service. Must have the __name__ attribute.
         """
         self._prefix = prefix.rstrip('.')
-        self._obj = obj
+        self.obj = obj
 
     @property
     def name(self):
         """Full python style name of the object."""
-        return '{}.{}'.format(self._prefix, self._obj.__name__)
+        return '{}.{}'.format(self._prefix, self.obj.__name__)
 
     @staticmethod
     def glob_match(haystack, needle):
@@ -54,14 +54,14 @@ class PyName(object):
 
         Returns:
             The new PyName object, constructed using (self.name, attribute). If
-            the object serviced by self, i.e, self._obj, does not have that
+            the object serviced by self, i.e, self.obj, does not have that
             attribute, return None.
 
         Arguments:
             attribute: The attribute to get.
         """
-        if hasattr(self._obj, attribute):
-            obj = getattr(self._obj, attribute)
+        if hasattr(self.obj, attribute):
+            obj = getattr(self.obj, attribute)
             return PyName(self.name, obj)
         else:
             return None
