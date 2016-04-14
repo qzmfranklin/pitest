@@ -1,4 +1,5 @@
 from . import dag
+from . import name
 
 import fnmatch
 import inspect
@@ -52,32 +53,53 @@ class TestCase(object):
         """Build dependency graph for test methods.
 
         Returns:
-            the dependency graph from on _internal_deps. Nodes in the graph are
-            2-tuples (metohd_name, method).
-
-        Attributes:
-            _internal_deps: maps a target to its prerequsite(s). Glob wildcard is
-            supported for targets and prerequisites.
+            The dependency graph from on _internal_deps. Nodes in the graph are
+            2-tuples (metohd_name, method). The method names are not the full
+            name, as serviced by the name.PyName class.
 
         Raises:
             Py3DAGError: When cyclic dependency is detected, with the exception
-            of self-dependency.
+                of self-dependency.
         """
         graph = dag.DAG()
         for test in self._get_all_tests():
             graph.add_node(*test)
-        for src_pattern, dst_pattern_list in self._internal_deps.items():
-            src_reg = fnmatch.translate(src_pattern)
-            for dst_pattern in dst_pattern_list:
-                dst_reg = fnmatch.translate(dst_pattern)
+        for src_pat, dst_pat_list in self._internal_deps.items():
+            for dst_pat in dst_pat_list:
                 # Add edges (src -> dst) to graph
                 for src in graph._nodes.keys():
                     for dst in graph._nodes.keys():
                         if src == dst: # Ignore self dependency.
                             continue
-                        if re.match(src_reg, src) and re.match(dst_reg, dst):
+                        if fnmatch.fnmatchcase(src_pat, src) and fnmatch.fnmatchcase(dst_pat, dst):
                             graph.add_edge(src, dst)
         return graph
+
+    @staticmethod
+    def deps_graph_from_name_obj(testcase_name_obj) -> dag.DAG:
+        """Build the dependency graph for the test case class.
+
+        Returns:
+            A dag.DAG object whose nodes are PyName instances servicing unbound
+            methods of this test case class.
+        """
+
+    @classmethod
+    def get_test_methods_class(cls):
+        """
+        Return a list of (name, method) tuples whose names match one or more of
+        the patterns listed in TestCase.test_patterns.
+
+        The returned methods are NOT bound to the instance of the test case
+        subclass and are callable.
+        """
+        test_methods = []
+        for pattern in cls.test_patterns:
+            cls_methods = inspect.getmembers(cls, inspect.isfunction)
+            for name, method in cls_methods:
+                if fnmatch.fnmatchcase(pattern, name):
+                    test_methods.append((name, method))
+        return test_methods
 
     def _get_all_tests(self):
         """
@@ -99,20 +121,3 @@ class TestCase(object):
                     test_methods.append((name, cls))
         return test_methods
 
-    @classmethod
-    def _get_all_tests_class(self_cls):
-        """
-        Return a list of (name, method) tuples whose names match one or more of
-        the patterns listed in TestCase.test_patterns.
-
-        The returned methods are NOT bound to the instance of the test case
-        subclass and are callable.
-        """
-        test_methods = []
-        for pattern in self_cls.test_patterns:
-            reg_pattern = fnmatch.translate(pattern)
-            cls_methods = inspect.getmembers(self_cls, inspect.isfunction)
-            for name, cls in cls_methods:
-                if re.match(reg_pattern, name):
-                    test_methods.append((name, cls))
-        return test_methods
