@@ -17,6 +17,7 @@ from .case import TestCase
 from .dag import DAG, Py3DAGError
 from .discover import Discover, DiscoverError
 from .main import Main
+from .name import PyName, PyNameError
 from .result import TestCaseResult, TestSuiteResult
 from .runner import Runner
 from .scheduler import Scheduler, SchedulerError
