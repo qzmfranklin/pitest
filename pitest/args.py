@@ -11,6 +11,31 @@ class Args(object):
             arguments, respectively.
     """
 
+    @staticmethod
+    def from_string(source_code, *, args_name):
+        """Get Args object from source code.
+
+        Returns:
+            A instance of pitest.Args.
+
+        Args:
+            source_code: python3 code that defines the args object.
+            args_name: The name of the pitest.Args object to return.
+
+        Raises:
+            Whatever exceptions exec(source_code) raises, or
+            ArgsError: args_name is not defined in source_code.
+        """
+        scope = {}
+        exec(source_code, scope)
+        return scope[args_name]
+
+    @staticmethod
+    def from_file(source_file, *, args_name):
+        """Get Args object from source file."""
+        with open(source_file, 'r', encoding = 'utf8') as f:
+            return Args.from_string(f.read(), args_name)
+
     def __init__(self):
         self._args   = { '__init__': (), 'setup': (), 'teardown': (), 'test': (),'setup_instance': (), 'teardown_instance': (), }
         self._kwargs = { '__init__': {}, 'setup': {}, 'teardown': {}, 'test': {},'setup_instance': {}, 'teardown_instance': {}, }
