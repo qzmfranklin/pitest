@@ -12,53 +12,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         formatter_class = argparse.ArgumentDefaultsHelpFormatter,
         description = 'pitest main script')
-
-    parser.add_argument('--start-dir', type = str,
-        default = '.',
-        help = 'start directory for recursive scan')
-    parser.add_argument('--basecases', type = str,
-        nargs = '+',
-        default = [ 'TestCase' ],
-        help = 'base test case classes to discover')
-    parser.add_argument('--recursive', action = 'store_true',
-        default = False,
-        help = 'recursively scan the start-dir')
-    parser.add_argument('--file-pattern', type = str,
-        default = '*.py',
-        help = 'pattern of files to scan')
-
-    subparsers = parser.add_subparsers(dest = 'command')
-
-    sp = subparsers.add_parser('discover',
-        formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    sp.add_argument('discover_kind', metavar = 'KIND',
-        type = str,
-        choices = ['all', 'case', 'method'],
-        help = 'what to discover, one of [ all, case, method ]')
-
-    sp = subparsers.add_parser('run',
-        formatter_class = argparse.ArgumentDefaultsHelpFormatter,
-        description = 'Can only run tests that do not take any arguments.')
-    sp.add_argument('run_kind', metavar = 'KIND',
-        type = str,
-        choices = ['case', 'method'],
-        help = 'what kind of target to run, one of [ case, method ]')
-    sp.add_argument('run_target_name', metavar = 'TARGET',
-        type = str,
-        #nargs = '+',
-        help = 'name of the target to run')
-    sp.add_argument('--args-file',
-        default = None,
-        help = '''python3 source file that defines the args_obj.
-                None = no arguments.''')
-    sp.add_argument('--args-name',
-        default = None,
-        help = '''name of the Args object in the source code. This
-                    argument is used to override the default name defined in
-                    __pitest_main_default_args_name__ in the source code.
-                    None = use default, i.e., the one defined by
-                    __pitest_main_default_args_name__.''')
-
+    pitest.Main.update_parser(parser)
     args = parser.parse_args()
 
     if args.command in ['discover', 'run']:
