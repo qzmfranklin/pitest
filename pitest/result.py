@@ -39,7 +39,7 @@ class TestCaseResult(object):
 
         Blocked test method: Test method that is not run because it has failed
         prerequisite(s).
-        
+
         Args:
             blocked_test: A dictionary mapping blocked tests to their blocking
                 tests. For example, { 'foo': {'bar', 'dir'} }
@@ -122,8 +122,7 @@ class TestSuiteResult(object):
             there it means that the task not ready for running.
     """
 
-    def __init__(self, testsuite_name, args_obj):
-        self._testsuite = testsuite_name
+    def __init__(self, args_obj):
         self._args_obj = args_obj
         self._testcase_results = []
         self._blocked_testcases = {}

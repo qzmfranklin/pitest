@@ -17,6 +17,14 @@ def foo_function(object):
 def bar_function(object):
     pass
 
+class SubGlobClass(object):
+    def test_foo1():
+        pass
+    def test_foo2():
+        pass
+    def test_bar():
+        pass
+
 class TestName(unittest.TestCase):
 
     def test_property_name(self):
@@ -51,6 +59,16 @@ class TestName(unittest.TestCase):
             # Non-existing attributes is subbed to None.
             for method_name in ['no way', 'foo_method2']:
                 self.assertEqual(None, name_obj.sub(method_name))
+
+    def test_subglob(self):
+        path = 'foo.bar'
+        test_nos = pitest.PyName(path, SubGlobClass).subglob('test_foo*')
+        expected = {
+            '{}.SubGlobClass.test_foo1'.format(path),
+            '{}.SubGlobClass.test_foo2'.format(path),
+        }
+        actual = set([no.name for no in test_nos])
+        self.assertEqual(actual, expected)
 
     def test_to_pyname(self):
         expect_true_samples = [

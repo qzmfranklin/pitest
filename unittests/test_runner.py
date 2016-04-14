@@ -3,55 +3,53 @@ import io
 import os
 import pitest
 import sys
+import textwrap
 import unittest
 
 # A -> B: A depends on B
-#          8      10
-#            \      \
-#             \      \
-#              \      \
-#   7 ---> 0 ---> 1 ---> 3 ---> 4
+#
+#       -> 6 ---> 8
+#      /     \      \
+#     /       \      \
+#    /         \      \
+#   5 ---> 0 ---> 1 ---> 3 ---> 4
 #    \       \        /
 #     \       \      /
 #      \       \    /
-#       -> 9 ---> 2
-
-class CaseBaseTmp(pitest.TestCase):
+#       -> 7 ---> 2
+class CaseBase1(pitest.TestCase):
     pass
-class DemoCase0(CaseBaseTmp):
+class DemoCase0(CaseBase1):
     deps = [ 'DemoCase1', 'DemoCase2' ]
-class DemoCase1(CaseBaseTmp):
+class DemoCase1(CaseBase1):
     deps = [ 'DemoCase3' ]
-class DemoCase2(CaseBaseTmp):
+class DemoCase2(CaseBase1):
     deps = [ 'DemoCase3' ]
-class DemoCase3(CaseBaseTmp):
+class DemoCase3(CaseBase1):
     deps = [ 'DemoCase4' ]
-class DemoCase4(CaseBaseTmp):
+class DemoCase4(CaseBase1):
     pass
-class DemoCase7(CaseBaseTmp):
-    deps = [ 'DemoCase0', 'DemoCase9' ]
-class DemoCase8(CaseBaseTmp):
-    deps = [ 'DemoCase1' ]
-class DemoCase9(CaseBaseTmp):
+class DemoCase5(CaseBase1):
+    deps = [ 'DemoCase0', 'DemoCase6', 'DemoCase7' ]
+class DemoCase6(CaseBase1):
+    deps = [ 'DemoCase1', 'DemoCase8' ]
+class DemoCase7(CaseBase1):
     deps = [ 'DemoCase2' ]
-class DemoCase10(CaseBaseTmp):
+class DemoCase8(CaseBase1):
     deps = [ 'DemoCase3' ]
 
-class TestSuiteDemo1(pitest.TestSuiteBase):
-    testcase_baseclasses = [ 'CaseBaseTmp' ]
-
-class CaseBaseTmp2(pitest.TestCase):
+class CaseBase2(pitest.TestCase):
     pass
-class DemoCase12(CaseBaseTmp2):
+class DemoCase9(CaseBase2):
     _internal_deps = {
-        'test_foo1': [ 'test_foo*' ],
-        'test_foo2': [ 'test_bar*', 'test_cha2' ],
-        'test_foo3': [ 'test_bar1', 'test_cha3' ],
-        'test_foo4': [ 'test_bar2', 'test_cha1', 'test_cha3' ],
-        'test_bar*': [ 'test_cha*' ],
-        'test_bar1': [ 'test_bar2' ],
-        'test_cha1': [ 'test_cha2' ],
-        'test_cha2': [ 'test_cha3' ],
+        'foo1': [ 'foo*' ],
+        'foo2': [ 'foo3', 'foo4', 'bar*', 'cha2' ],
+        'foo3': [ 'foo4', 'bar1', 'cha3' ],
+        'foo4': [ 'bar2', 'cha1', 'cha3' ],
+        'bar*': [ 'cha*' ],
+        'bar1': [ 'bar2' ],
+        'cha1': [ 'cha2' ],
+        'cha2': [ 'cha3' ],
     }
     def test_foo1(self):
         print('test_foo1')
@@ -72,55 +70,55 @@ class DemoCase12(CaseBaseTmp2):
     def test_cha3(self):
         print('test_cha3')
 
-class TestSuiteDemo2(pitest.TestSuiteBase):
-    testcase_baseclasses = [ 'CaseBaseTmp2' ]
-
 class TestRunner(unittest.TestCase):
-    # This test uses the golden file approach.
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    this_basename = os.path.basename(__file__)
+    prefix = pitest.PyName.to_pyname(this_basename)
 
-    def test_run_case(self):
-        fname = os.path.relpath(__file__)
-        suite = TestSuiteDemo2()
-        suite.load_file(fname)
-        expected_stdout = """\
-test_cha3
-test_cha2
-test_cha1
-test_bar2
-test_bar1
-test_foo2
-test_foo3
-test_foo4
-test_foo1
-"""
+    def test_run_many(self):
+        case_nos = [ pitest.PyName(self.prefix, cls) for cls in [
+                DemoCase0, DemoCase1, DemoCase2,
+                DemoCase3, DemoCase4, DemoCase5,
+                DemoCase6, DemoCase7, DemoCase8,
+            ]
+        ]
+
+        print_name = lambda case_no : print(case_no.name)
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            result = pitest.Runner.run_test_suite(suite)
-        self.assertEqual(buf.getvalue(), expected_stdout)
+            result = pitest.Runner0.run_many(case_nos, visitor_func = print_name)
+            output = buf.getvalue()
+            expected = textwrap.dedent('''\
+                    test_runner.DemoCase4
+                    test_runner.DemoCase3
+                    test_runner.DemoCase1
+                    test_runner.DemoCase2
+                    test_runner.DemoCase0
+                    test_runner.DemoCase7
+                    test_runner.DemoCase8
+                    test_runner.DemoCase6
+                    test_runner.DemoCase5
+                    ''')
+            self.assertEqual(expected, output)
 
-    def test_run_suite(self):
-        fname = os.path.relpath(__file__)
-        suite = TestSuiteDemo1()
-        suite.load_file(fname)
-        result = pitest.Runner.run_test_suite(suite)
-        expected_result_string = """\
-(no args)
-test_runner.DemoCase4: finished 0 tests
-test_runner.DemoCase3: finished 0 tests
-test_runner.DemoCase1: finished 0 tests
-test_runner.DemoCase10: finished 0 tests
-test_runner.DemoCase2: finished 0 tests
-test_runner.DemoCase0: finished 0 tests
-test_runner.DemoCase8: finished 0 tests
-test_runner.DemoCase9: finished 0 tests
-test_runner.DemoCase7: finished 0 tests
-================================================================
-
-SUCCESS: 9
-
-PASS
-"""
-        self.assertEqual(str(result), expected_result_string)
+    def test_run_one(self):
+        case_no = pitest.PyName(self.prefix, DemoCase9)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            result = pitest.Runner0.run_one(case_no)
+            output = buf.getvalue()
+            expected = textwrap.dedent('''\
+                    test_cha3
+                    test_cha2
+                    test_cha1
+                    test_bar2
+                    test_bar1
+                    test_foo4
+                    test_foo3
+                    test_foo2
+                    test_foo1
+                    ''')
+            self.assertEqual(expected, output)
 
 if __name__ == '__main__':
     unittest.main(verbosity = 0)

@@ -6,16 +6,17 @@ Features of PITEST:
     - passing in arguments at run time
     - efficient and selective test discovery
     - dependency tracking and parallel testing
-    - snake_case instead camelCase
+    - snake_case instead of camelCase
 """
 
 from .args import Args, ArgsError
 from .case import TestCase
 from .dag import DAG, Py3DAGError
+from .deps import Deps
 from .discover import Discover, DiscoverError
 from .main import Main
 from .name import PyName, PyNameError
 from .result import TestCaseResult, TestSuiteResult
-from .runner import Runner
+from .runner import Runner0
 from .scheduler import Scheduler, SchedulerError
 from .suite import TestSuiteBase, TestSuiteBaseError

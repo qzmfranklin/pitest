@@ -1,4 +1,5 @@
 import fnmatch
+import inspect
 import os
 import re
 
@@ -65,6 +66,16 @@ class PyName(object):
             return PyName(self.name, obj)
         else:
             return None
+
+    def subglob(self, pattern):
+        """Similar to sub(), return a list of objects that match the pattern.
+        """
+        out = set()
+        info = inspect.getmembers(self.obj)
+        for name, member in info:
+            if fnmatch.fnmatch(name, pattern):
+                out.add(PyName(self.name, member))
+        return out
 
     @staticmethod
     def to_pyname(fname):

@@ -1,49 +1,39 @@
+from . import deps
 from . import result
 from . import scheduler
 from . import suite
 
+class Runner0(object):
 
-import traceback
+    """Sequential runner class.
 
-class Runner(object):
+    """
 
-    @staticmethod
-    def run_test_suite(suite, args_obj = None):
-        """Run all test cases for the test suite.
+    def run_many(case_nos, *, args_obj = None, respect_deps = True,
+            visitor_func = None):
+        """Run test cases while respecting their inter-dependencies.
 
-        Returns:
-            An newly-created TestSuiteResult object that has all information
-            about this run.
-
-        Args:
-            suite: An instance of a subclass of pitest.TestSuiteBase.
-            args_obj: An instance of Args.
+        Arguments:
+            case_nos: A list/set of PyName instances servicing test case
+                classes.
+            args_obj: The Args object used to run the test methods.
+            respect_deps: Respect dependency, as specified by TestCase.deps and
+                TestCase._internal_deps.
+            visotor_func: A function taking a case_no as argument. The visitor
+                function. Run prior to running the case.
         """
-        res = result.TestSuiteResult(suite.__class__.__name__, args_obj)
-
-        graph = suite.get_deps_graph()
-        sched = scheduler.Scheduler(graph, deepcopy = False)
-        args, kwargs = ((), {}) if args_obj is None else args_obj.get_method_args('__init__')
+        graph = deps.Deps.deps_graph_for_suite(case_nos)
+        sched = scheduler.Scheduler(graph, deepcopy = True)
         while sched.available_tasks:
             task_id = sorted(sched.available_tasks)[0]
             sched.fetch_task(task_id)
-            testcase_cls = graph.get_data(task_id)
-            testcase_instance = testcase_cls(*args, **kwargs)
-            testcase_result = Runner.run_test_case(testcase_instance, args_obj,
-                    fullname = task_id)
-            res.add_test_case_result(testcase_result)
-            if testcase_result.success:
-                sched.deliver_task(task_id)
-            else:
-                sched.fail_task(task_id)
+            case_no = graph.get_data(task_id)
+            if visitor_func:
+                visitor_func(case_no)
+            Runner0.run_one(case_no, args_obj = args_obj)
+            sched.deliver_task(task_id)
 
-        res.set_blocked_testcases(sched.blocked_tasks)
-        res.set_unknown_testcases(sched.unknown_tasks)
-
-        return res
-
-    @staticmethod
-    def run_test_case(case, args_obj = None, *, fullname = None):
+    def run_one(case_no, *, args_obj = None):
         """Run all test methods for the test case.
 
         Returns:
@@ -51,39 +41,39 @@ class Runner(object):
             about this run.
 
         Args:
-            case: An instance of a subclass of pitest.TestCase.
-            args_obj: An instance of Args.
-            fullname: The full name of the test case. If None, just use
-                case.__class__.__name__.
+            graph: A dag.DAG instance whose nodes are (name, PyName), and the
+                PyName instances service test methods of test cases.
+            args_obj: An instance of Args. The default, None, means no
+                arguments.
         """
-        testcase_name = fullname if fullname else case.__class__.__name__
-        res = result.TestCaseResult(testcase_name)
+        graph = deps.Deps.deps_graph_for_case(case_no)
+        args, kwargs = ((), {}) if args_obj is None else args_obj.get_method_args('__init__')
+        case_instance = case_no.obj(*args, **kwargs)
+        del args, kwargs
 
-        graph = case.get_deps_graph()
-        sched = scheduler.Scheduler(graph, deepcopy = False)
-        Runner._call_method_with_args(case.setup_instance, args_obj)
+        sched = scheduler.Scheduler(graph, deepcopy = True)
+        Runner0._call_method_with_args(case_instance.setup_instance, args_obj)
         while sched.available_tasks:
             task_id = sorted(sched.available_tasks)[0]
             sched.fetch_task(task_id)
-            test_method = graph.get_data(task_id)
-            Runner._call_method_with_args(case.setup, args_obj)
+            test_method = case_instance._get_method_by_name(task_id)
+            Runner0._call_method_with_args(case_instance.setup, args_obj)
 
-            retval = Runner._call_method_with_args(test_method, args_obj)
+            retval = Runner0._call_method_with_args(test_method, args_obj)
             if retval is None:
                 sched.deliver_task(task_id)
-                res.add_success(task_id)
+                #res.add_success(task_id)
             else:
                 sched.fail_task(task_id)
-                res.add_failure(task_id, retval)
-            Runner._call_method_with_args(case.teardown, args_obj)
-        Runner._call_method_with_args(case.teardown_instance, args_obj)
+                #res.add_failure(task_id, retval)
+            Runner0._call_method_with_args(case_instance.teardown, args_obj)
+        Runner0._call_method_with_args(case_instance.teardown_instance, args_obj)
 
-        res.set_blocked_tests(sched.blocked_tasks)
-        res.set_unknown_tests(sched.unknown_tasks)
+        #res.set_blocked_tests(sched.blocked_tasks)
+        #res.set_unknown_tests(sched.unknown_tasks)
 
-        return res
+        #return res
 
-    @staticmethod
     def _call_method_with_args(method, args_obj):
         if args_obj is None:
             return method()

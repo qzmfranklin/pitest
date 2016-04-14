@@ -1,4 +1,5 @@
 from . import case
+from . import name
 
 import fnmatch
 import glob
@@ -13,8 +14,8 @@ class DiscoverError(Exception):
 class Discover:
 
     @staticmethod
-    def discover(start_dir, *, baseclasses = [ case.TestCase.__name__ ],
-            recursive = True, pattern = '*.py'):
+    def discover(start_dir, *, recursive = True, pattern = '*.py',
+                 baseclass = case.TestCase.__name__):
         """Discover test cases.
 
         Scan @start_dir directory recursively for files whose name match
@@ -48,9 +49,14 @@ class Discover:
                 class Case1(pitest.TestcaseBase):
                     deps = [ 'UnitTest' ]
 
+        Returns:
+            A list of pitest.PyName objects, whose name property is the full
+            name of the test case class, and the obj attribute is the test case
+            class object.
+
         Args:
             return: A list of classes.
-            baseclasses: A list of names of test case base classes. Only
+            baseclass: A list of names of test case base classes. Only
                 subclasses of at least one class in this list are loaded.
             recursive: True:  Recursively scan all subdirectories of @start_dir.
                 False: Only scan files in @start_dir.
@@ -65,104 +71,64 @@ class Discover:
         if recursive:
             reg_pattern = fnmatch.translate(pattern)
             for root, dirs, files in os.walk(start_dir):
-                for fname in [ f for f in files if re.match(reg_pattern, f) ]:
-                    fullpath = os.path.join(root, fname)
-                    relpath = os.path.relpath(fullpath)
-                    testcases += Discover.load_file(relpath,
-                            baseclasses = baseclasses)
+                for fname in files:
+                    if re.match(reg_pattern, fname):
+                        fullpath = os.path.join(root, fname)
+                        testcases += Discover.load_file(fullpath,
+                                basepath = start_dir, baseclass = baseclass)
         else:
-            file_list = glob.glob(start_dir + '/' + pattern)
-            for fname in file_list:
-                testcases += Discover.load_file(fname, baseclasses = baseclasses)
+            glob_pattern = os.path.join(start_dir, pattern)
+            for fname in glob.glob(glob_pattern):
+                testcases += Discover.load_file(fname,
+                        basepath = start_dir, baseclass = baseclass)
         return testcases
 
-
     @staticmethod
-    def load_file(fname, *, baseclasses = [ case.TestCase.__name__ ]):
+    def load_file(fname, *, baseclass = case.TestCase.__name__,
+            basepath = None, resolve_symlink = False):
         """Load test cases from a single file.
 
         Namespace rules applies the same way as documented in discover().
 
         Returns:
-            A list of (full_cls_name, cls) tuples.
-            A full_cls name looks like this:
-                .some.path.to.this_module.some_class
-            The full_cls_name introduces namespaces to test discovery.
+            A list of pitest.PyName objects.
 
         Args:
-            baseclasses: A list of names of test case base classes. Only
+            fname: The file to load.
+            baseclass: A list of names of test case base classes. Only
                 subclasses of at least one class in this list are loaded.
+            basepath: The base path to compute relative path with. The default,
+                None, means use os.getcwd().
+            resolve_symlink: Boolean. True = resolve symlinks in fname. False
+                otherwise.
         """
+        # Compute name_prefix.
+        basepath    = basepath if basepath else os.getcwd()
+        if resolve_symlink:
+            fullpath = os.path.realpath(fname)
+            basepath = os.path.realpath(basepath)
+        else:
+            fullpath = os.path.abspath(fname)
+        relpath     = os.path.relpath(fullpath, basepath)
+        name_prefix = name.PyName.to_pyname(os.path.normpath(relpath))
 
-        realpath    = os.path.realpath(fname)
-        dirname     = os.path.dirname(realpath)
-        basename    = os.path.basename(realpath)
+        # __import__ the module.
+        dirname     = os.path.dirname(fullpath)
+        basename    = os.path.basename(fullpath)
         module_name = os.path.splitext(basename)[0]
-
         sys.path.append(dirname)
         module = __import__(module_name, globals())
         sys.path.pop()
 
+        # Get subclasses of baseclass.
         classes_map = inspect.getmembers(module, inspect.isclass)
         classes = []
         for cls_name, cls in classes_map:
             for super_cls in inspect.getmro(cls)[1:]:
-                full_super_cls_name = Discover._convert_path(fname) + '.' + super_cls.__name__
-                if Discover._match_full_class_name(full_super_cls_name, baseclasses):
-                    full_cls_name = Discover._convert_path(fname) + '.' + cls_name
-                    cls_tuple = (full_cls_name, cls)
-                    classes.append(cls_tuple)
+                # The trailing 'no' stands for 'name object'.
+                super_cls_no = name.PyName(name_prefix, super_cls)
+                if super_cls_no.match(baseclass):
+                    cls_no = name.PyName(name_prefix, cls)
+                    classes.append(cls_no)
 
         return classes
-
-    @staticmethod
-    def _match_full_class_name(full_cls_name, baseclasses):
-        """Check if a full class name matches any in a given list.
-
-        This method does not require the baseclass to be loaded to function.
-        No glob patterns allowed.
-
-        Returns:
-            True: If at least one of baseclasses matches full_cls_name.
-            False: Otherwise
-
-            For example:
-                ('foo.bar.Case1', 'Case1')          => True
-                ('foo.bar.Case1', 'bar.Case1')      => True
-                ('foo.bar.Case1', 'foo.Case1')      => False
-                ('foo.bar.Case1', 'Case2')          => False
-                ('foo.bar.Case100', 'Case10')       => False
-
-        Args:
-            full_cls_name: The class object to test.
-            baseclasses: A list of names of base classes.
-        """
-        for baseclass in baseclasses:
-            reg_pattern = '^(({0})|(.*\.{0}))$'.format(baseclass)
-            if re.match(reg_pattern, full_cls_name):
-                return True
-        return False
-
-    @staticmethod
-    def _convert_path(fname):
-        """Convert UNIX path to python package name.
-
-        Example:
-            /usr/lib/python/unit-test.py      =>    .usr.lib.python.unit_test
-            relative/path/to/this_modue.py    =>    relative.path.to.this_module
-
-        Expand '~' to $HOME.
-        Does not resolve symlinks or absolute path.
-        Replace hypen '-' with underscore '_'.
-
-        Raises:
-            DiscoverError: The file name contains dot '.'.
-        """
-        basename, ext = os.path.splitext(os.path.expanduser(os.path.normpath(fname)))
-        if ext != '.py':
-            raise DiscoverError("Path '{}' must be a python file, i.e, ends with '.py'.".format(fname))
-        basename = basename.replace('-', '_')
-        if len(set('.') & set(basename)) > 0:
-            raise DiscoverError("Path '{}' must not have '.'.".format(basename))
-        retval = basename.replace('/', '.')
-        return retval
