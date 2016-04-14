@@ -28,26 +28,23 @@ class TestCase(object):
             partial name resolves to more than one loaded test case, an error is
             raised. See more about namespace and resolution, please refer to
             Discover.discover.__doc__ in discover.py.
-        internal_deps: Dependencies between test methods in this test case,
+        _internal_deps: Dependencies between test methods in this test case,
             stored as a dictionary that maps targets to prerequisites. Support
             glob patterns.
                 Example:
                     { 'test_foo*' : [ 'test_bar*', 'test_foo*bar' ] }
     """
 
-    deps = []
-    internal_deps = {}
     test_patterns = [ 'test_*', ]
+    deps = []
+    _internal_deps = {}
 
     def setup(self, *args, **kwargs):
         pass
-
     def teardown(self, *args, **kwargs):
         pass
-
     def setup_instance(self, *args, **kwargs):
         pass
-
     def teardown_instance(self, *args, **kwargs):
         pass
 
@@ -55,11 +52,11 @@ class TestCase(object):
         """Build dependency graph for test methods.
 
         Returns:
-            the dependency graph from on internal_deps. Nodes in the graph are
+            the dependency graph from on _internal_deps. Nodes in the graph are
             2-tuples (metohd_name, method).
 
         Attributes:
-            internal_deps: maps a target to its prerequsite(s). Glob wildcard is
+            _internal_deps: maps a target to its prerequsite(s). Glob wildcard is
             supported for targets and prerequisites.
 
         Raises:
@@ -69,7 +66,7 @@ class TestCase(object):
         graph = dag.DAG()
         for test in self._get_all_tests():
             graph.add_node(*test)
-        for src_pattern, dst_pattern_list in self.internal_deps.items():
+        for src_pattern, dst_pattern_list in self._internal_deps.items():
             src_reg = fnmatch.translate(src_pattern)
             for dst_pattern in dst_pattern_list:
                 dst_reg = fnmatch.translate(dst_pattern)

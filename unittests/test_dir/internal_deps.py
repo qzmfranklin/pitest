@@ -1,7 +1,7 @@
 import case_base
 
 class DemoClass3(case_base.CaseBase3):
-    internal_deps = { 'test_foo': 'test_bar' }
+    _internal_deps = { 'test_foo': 'test_bar' }
     def run(self):
         pass
     def test_foo(self):

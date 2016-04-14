@@ -47,10 +47,10 @@ Usage Examples
 
         # If test methods have inter-dependencies, i.e., certain tests must precede
         # some other tests, you can define the dependencies using the
-        # 'internal_deps' class variable. Here is an example:
-        #       internal_deps = { 'test_foo1': [ 'test_bar1*', 'test_bar2*' ],
-        #                         'test_hel*lo': [ 'test_no', 'test_yes*' ],
-        #                       }
+        # '_internal_deps' class variable. Here is an example:
+        #       _internal_deps = { 'test_foo1': [ 'test_bar1*', 'test_bar2*' ],
+        #                          'test_hel*lo': [ 'test_no', 'test_yes*' ],
+        #                        }
 
         # If this test case depend on other test cases, you can specify their
         # dependencies via the 'deps' class variable. Here is an example:

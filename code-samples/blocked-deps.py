@@ -7,7 +7,7 @@ Basic usage is found at basic-usage.py.
 
 The test cases in this program has the following dependencies
 ( A -> B: A depends on B )
-                   -> 4 
+                   -> 4
                   /     \\
                  /       \\
         0 ---> 1 ---> 2 ---> 3
@@ -18,9 +18,9 @@ succeed.
 
 There are two kinds of blocking:
     a)  Within a test case, a failed test method blocks other test methods.
-        DemoCase2.bar blocks DemoCase2.foo due to internal_deps (internal
+        DemoCase2.bar blocks DemoCase2.foo due to _internal_deps (internal
         dependencies). Whereas DemoCase4.bar does not block DemoCase4.foo
-        because there is no internal_deps.
+        because there is no _internal_deps.
     b)  Acrodss test cases, a failed test case blocks other test cases.
         Both DemoCase2 and DemoCase4 fail. They directly block DemoCase1 and
         indirectly block DemoCase0. In the test result summary, DemoCase1 is
@@ -52,7 +52,7 @@ class DemoCase1(CaseBase):
     deps = [ 'DemoCase2', 'DemoCase4' ]
 class DemoCase2(CaseBase):
     deps = [ 'DemoCase3' ]
-    internal_deps = { 'test_foo': [ 'test_bar' ] }
+    _internal_deps = { 'test_foo': [ 'test_bar' ] }
     def test_bar(self):
         return ' <--- PROGRAMMED TO FAIL, blocks DemoCase2.foo'
 class DemoCase3(CaseBase):

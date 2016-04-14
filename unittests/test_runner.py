@@ -43,7 +43,7 @@ class TestSuiteDemo1(pitest.TestSuiteBase):
 class CaseBaseTmp2(pitest.TestCase):
     pass
 class DemoCase12(CaseBaseTmp2):
-    internal_deps = {
+    _internal_deps = {
         'test_foo1': [ 'test_foo*' ],
         'test_foo2': [ 'test_bar*', 'test_cha2' ],
         'test_foo3': [ 'test_bar1', 'test_cha3' ],
