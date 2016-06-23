@@ -7,7 +7,7 @@ class TestScheduler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create graph
-        graph = pitest.DAG()
+        graph = pitest.Dag()
 
         # Add nodes
         for i in range(5):

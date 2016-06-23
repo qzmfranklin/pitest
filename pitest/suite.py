@@ -78,7 +78,7 @@ class TestSuiteBase(object):
                 "suite.load_file('{}') did not find any test cases.".format(fname))
         self._add_testcases(testcases)
 
-    def get_deps_graph(self) -> dag.DAG:
+    def get_deps_graph(self) -> dag.Dag:
         """Build the dependency graph for all loaded test cases.
 
         Returns:
@@ -93,7 +93,7 @@ class TestSuiteBase(object):
 
         TODO: Report error when trying to reference unloaded modules.
         """
-        graph = dag.DAG()
+        graph = dag.Dag()
         for fullname, test in self.testcases:
             graph.add_node(fullname, test)
 

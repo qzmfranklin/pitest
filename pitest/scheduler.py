@@ -7,24 +7,32 @@ class SchedulerError(Exception):
 
 class Scheduler(object):
     """
-    A dynamic scheduler based on directed acyclic graph (DAG).
-    
+    A dynamic scheduler based on directed acyclic graph (Dag).
+
     An edge A -> B is interpreted as 'A depends on B.'
 
     Attributes:
-        _dag: An dag.DAG object.
+        _dag: An dag.Dag object.
         _task_status: A dicitonary holding the status of tasks.
         _available_tasks: Tasks that can run concurrently.
         _blocked_tasks: Dicionary mapping blocked tasks to their blocking tasks.
+
+    'failed' vs. 'error':
+        The two statuses, 'failed' and 'error', are treated exactly the same by
+        this Scheduler class. 'failed' means that the task hit the failed
+        assertion or test without raising any exceptions. 'error' means that an
+        exeption is raised when executing the task. This difference could be
+        important to backend analysis modules and is best incorporated at the
+        scheduler level.
     """
 
-    _status_set = { 'untouched', 'fetched', 'delivered', 'failed' }
+    _status_set = { 'untouched', 'fetched', 'delivered', 'failed', 'error' }
 
-    def __init__(self, deps_graph: dag.DAG, *, deepcopy = True):
+    def __init__(self, deps_graph: dag.Dag, *, deepcopy = True):
         """
         deps_graph:
-            Must be dag.DAG object.
-            Access the 'private' fields in dag.DAG.
+            Must be dag.Dag object.
+            Access the 'private' fields in dag.Dag.
             Used in a read-only manner.
 
         deepcopy:
@@ -45,7 +53,7 @@ class Scheduler(object):
         """
         self._change_status('untouched')
         self._available_tasks = set(self._dag.sinks)
-        self._blocked_tasks = dict()
+        self._blocked_tasks = {}
 
     @property
     def available_tasks(self):
@@ -83,7 +91,7 @@ class Scheduler(object):
 
         Raises:
             SchedulerError: if the task if already fetched or delivered.
-        
+
         NOTE:
             fetch_task() does not remove task from the available_tasks. Tasks
             are removed from available_tasks when they are delivered or failed.
@@ -92,7 +100,7 @@ class Scheduler(object):
             raise SchedulerError("Cannot fetch a fetched task '{}' without fetched_ok".format(task_id))
         if self._task_status[task_id] == 'delivered':
             raise SchedulerError("Cannot fetch a delivered task '{}' without delivered_ok".format(task_id))
-        if self._task_status[task_id] == 'failed':
+        if self._task_status[task_id] in { 'failed', 'error' }:
             if not failed_ok:
                 raise SchedulerError("Cannot fetch a failed task '{}' without failed_ok".format(task_id))
             tmp = copy.deepcopy(self.blocked_tasks)
@@ -112,7 +120,7 @@ class Scheduler(object):
 
         Args:
             nofetch_ok: Do not raise error if the task being delivered is not
-                fetched. 
+                fetched.
 
         Raises:
             SchedulerError: if the task being delivered was not previously
@@ -132,8 +140,8 @@ class Scheduler(object):
             if is_ready:
                 self._available_tasks.add(parent)
 
-    def fail_task(self, task_id, *, nofetch_ok = False):
-        """Atomically mark a previously fetched task as failed.
+    def fail_task(self, task_id, *, nofetch_ok = False, is_exception = False):
+        """Atomically mark a previously fetched task as failed or error.
 
         Remove task_id from available_tasks, add its depending tasks to
         blocked_tasks.
@@ -141,6 +149,9 @@ class Scheduler(object):
         Args:
             nofetch_ok: Do not raise error if the task being failed is not
                 fetched.
+            is_exception: An exception is raised while executing this task. The
+                only difference is to mark this task as 'error' instead of
+                'failed'.
 
         Raises:
             SchedulerError: if the task being failed was not previously fetched,
@@ -149,7 +160,7 @@ class Scheduler(object):
         if not nofetch_ok and self._task_status[task_id] != 'fetched':
             raise SchedulerError("Cannot fail a task (id = '{}') that was not previously fetched."
                     .format(task_id))
-        self._task_status[task_id] = 'failed'
+        self._task_status[task_id] = 'error' if is_exception else 'failed'
         self._available_tasks.remove(task_id)
         for parent in self._dag._in[task_id]:
             if parent in self._blocked_tasks:
@@ -160,7 +171,7 @@ class Scheduler(object):
     def fetch_tasks(self, task_ids, **kwargs):
         for id in copy.deepcopy(task_ids):
             self.fetch_task(id, **kwargs)
-    
+
     def deliver_tasks(self, task_ids, **kwargs):
         for id in copy.deepcopy(task_ids):
             self.deliver_task(id, **kwargs)
@@ -173,7 +184,7 @@ class Scheduler(object):
         """Internal helper for changing the status of a given task or all tasks.
 
         status:
-            one of { 'untouched', 'fetched', 'delivered', 'failed' }
+            one of { 'untouched', 'fetched', 'delivered', 'failed', 'error' }
 
         task_id:
             None = all tasks.

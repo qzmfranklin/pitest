@@ -1,10 +1,10 @@
 import pprint
 import sys
 
-class Py3DAGError(Exception):
+class DagError(Exception):
     pass
 
-class DAG(object):
+class Dag(object):
     """Directed Acyclic Graph, used by pitest.Scheduler.
     """
 
@@ -14,7 +14,7 @@ class DAG(object):
             { id : data }
             id:   an id to uniquely identify the node in a graph
             data: data associated with the node
-            
+
             NOTE: ids can be any type. Recommend using either str or int
             consistently in your own case.
 
@@ -78,14 +78,14 @@ class DAG(object):
         """
         if id in self._nodes:
             if dup == 'error':
-                raise Py3DAGError("Node with id = '{}' already exists.".format(id))
+                raise DagError("Node with id = '{}' already exists.".format(id))
             elif dup == 'ignore':
                 return
             elif dup == 'overwrite':
                 pass
             else:
                 dups = [ 'error', 'ignore', 'overwrite' ]
-                raise Py3DAGError("Keyword argument 'dup' must be one of {}".format(dups))
+                raise DagError("Keyword argument 'dup' must be one of {}".format(dups))
         self._nodes[id] = data
         self._in[id]  = set()
         self._out[id] = set()
@@ -97,12 +97,12 @@ class DAG(object):
             noexist_ok: Do not raise error when deleing non-existing node.
 
         Raises:
-            Py3DAGError: Delete non-existing node.
+            DagError: Delete non-existing node.
         """
 
         if not id in self._nodes:
             if not noexist_ok:
-                raise Py3DAGError("Node with id = '{}' does not exist.".format(id))
+                raise DagError("Node with id = '{}' does not exist.".format(id))
             else:
                 return
 
@@ -119,14 +119,14 @@ class DAG(object):
         No-op if src_id == dst_id.
 
         Raises:
-            Py3DAGError if this is a backedge.
+            DagError if this is a backedge.
         """
         if src_id == dst_id:
             return
         if not exist_ok and dst_id in self._out[src_id]:
-            raise Py3DAGError("Edge '{}' -> '{}' already exists.".format(src_id, dst_id))
+            raise DagError("Edge '{}' -> '{}' already exists.".format(src_id, dst_id))
         if not backedge_ok and src_id in self._out[dst_id]:
-            raise Py3DAGError("Cannot add backedge '{}' -> '{}'.".format(src_id, dst_id))
+            raise DagError("Cannot add backedge '{}' -> '{}'.".format(src_id, dst_id))
         self._in[dst_id].add(src_id)
         self._out[src_id].add(dst_id)
 
@@ -171,7 +171,7 @@ class DAG(object):
             if not id in vflags or vflags[id] == 'black':
                 continue
             if vflags[id] == 'grey':
-                raise Py3DAGError("A source node '{}' is grey".format(id))
+                raise DagError("A source node '{}' is grey".format(id))
             stack = [id]
             vflags[id] = 'grey'
             while len(stack) != 0:
@@ -186,5 +186,5 @@ class DAG(object):
                     elif vflags[child] == 'grey':
                         return (curr, child)
                     else:
-                        raise Py3DAGError("Unknown vflag '{}'. Can only be 'white', 'grey', or 'black'")
+                        raise DagError("Unknown vflag '{}'. Can only be 'white', 'grey', or 'black'")
         return None

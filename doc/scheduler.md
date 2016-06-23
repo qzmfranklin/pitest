@@ -6,7 +6,7 @@
 
 We denote 'A depends on B' or 'B is a prerequisite of A' as 'A -> B', where 'A'
 and 'B' are nodes and '->' is the directed edge connecting A to B the in acyclic
-directed graph (DAG). Hereafter, 'task' and 'node' are used interchangeably. The
+directed graph (Dag). Hereafter, 'task' and 'node' are used interchangeably. The
 word 'task' may mean either the node in the graph, or the actual task that is
 scheduled by this scheduler.  The meaning should be clear from context unless
 explicitly spoken.
@@ -18,7 +18,7 @@ tasks. We denote the set of tasks that can be executed concurrently as
 
 At the beginning, all tasks are 'untouched'. The initial @available_tasks is
 just the set of tasks that have no prerequisites, i.e., the set of sinks in the
-DAG.
+Dag.
 
 External processes/threads/functions can 'fetch' tasks from the initial
 @available_tasks atomically and try to execute the fetched task. The 'fetch'
@@ -84,7 +84,7 @@ When a task is 'fail'ed, the scheduler does two things too.
 
 ##  Dependencies
 
-The scheduler uses a DAG class from py3_dag.py.
+The scheduler uses a Dag class from py3_dag.py.
 
 ## TODO
 
@@ -92,7 +92,7 @@ The scheduler uses a DAG class from py3_dag.py.
 
 ## Unit Test
 
-The unit test tests the DAG class and the core API of the scheduler class.
+The unit test tests the Dag class and the core API of the scheduler class.
 
 The test uses the unittest library.
 

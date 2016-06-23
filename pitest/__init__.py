@@ -11,7 +11,7 @@ Features of PITEST:
 
 from .args import Args, ArgsError
 from .case import TestCase
-from .dag import DAG, Py3DAGError
+from .dag import Dag, DagError
 from .deps import Deps
 from .discover import Discover, DiscoverError
 from .main import Main

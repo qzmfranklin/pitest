@@ -11,16 +11,16 @@ class Deps(object):
     def deps_graph_for_suite(case_nos, *, respect_deps = True):
         """Build dependency graph among test cases.
 
-        TestCase.deps are used to construct the DAG.
+        TestCase.deps are used to construct the Dag.
 
         Arguments:
             case_nos: A list/set of PyName instances servicing TestCase classes.
             respect_deps: Respect TestCase.deps.
 
         Returns:
-            A dag.DAG object whose nodes are (name, PyName) tuples.
+            A dag.Dag object whose nodes are (name, PyName) tuples.
         """
-        graph = dag.DAG()
+        graph = dag.Dag()
         for case_no in case_nos:
             graph.add_node(case_no.name, case_no)
 
@@ -40,7 +40,7 @@ class Deps(object):
     def deps_graph_for_case(case_no, *, respect_deps = True):
         """Build the dependency graph for the test case class.
 
-        TestCase._internal_deps are used to construct the DAG. Note that
+        TestCase._internal_deps are used to construct the Dag. Note that
         _internal_deps omit the common prefix to test methods.
 
         Arguments:
@@ -48,11 +48,11 @@ class Deps(object):
             respect_deps: Respect TestCase._internal_deps
 
         Returns:
-            A dag.DAG object whose nodes are (name, PyName) tuples.
+            A dag.Dag object whose nodes are (name, PyName) tuples.
         """
         case = case_no.obj    # the test case class object
 
-        graph = dag.DAG()
+        graph = dag.Dag()
         for test in case._get_test_method_names_class():
             obj = case_no.sub(test)
             graph.add_node(obj.name, obj)

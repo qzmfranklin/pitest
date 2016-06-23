@@ -1,11 +1,11 @@
 import pitest
 import unittest
 
-class TestDAG(unittest.TestCase):
+class TestDag(unittest.TestCase):
 
     def test_dag(self):
         # Create graph
-        graph = pitest.DAG()
+        graph = pitest.Dag()
 
         # Add nodes
         for i in range(5):
