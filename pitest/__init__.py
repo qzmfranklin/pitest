@@ -16,7 +16,7 @@ from .deps import Deps
 from .discover import Discover, DiscoverError
 from .main import Main
 from .name import PyName, PyNameError
-from .result import TestCaseResult, TestSuiteResult
+from .result import CaseResult, SuiteResult
 from .runner import Runner0
 from .scheduler import Scheduler, SchedulerError
 from .suite import TestSuiteBase, TestSuiteBaseError
